@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Backend (Node.js)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/index.js",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeArgs": ["--inspect-brk=9229"],
+      // "port": 9229,
+      "envFile": "${workspaceFolder}/backend/.env",
+      "console": "integratedTerminal",
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "smartStep": true,
+      "outFiles": ["${workspaceFolder}/backend/**/*.js"]
+    },
+    {
+      "name": "Debug Frontend (Vue + Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "sourceMaps": true,
+      "preLaunchTask": "start vite",
+      "postDebugTask": "stop vite",
+      "timeout": 30000,
+      "userDataDir": false
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Full Stack (Backend + Frontend)",
+      "configurations": [
+        "Debug Backend (Node.js)",
+        "Debug Frontend (Vue + Chrome)"
+      ],
+      "stopAll": true
+    }
+  ]
+}
