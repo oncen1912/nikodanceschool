@@ -1,19 +1,32 @@
 <template>
-  <div>
+  <!-- <div>
     <a href="https://vite.dev" target="_blank">
       <img src="/vite.svg" class="logo" alt="Vite logo" />
     </a>
     <a href="https://vuejs.org/" target="_blank">
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  </div> -->
+  <!-- Include the tab navigation -->
+  <TabsNavigation />
+
+  <!-- Main content starts below navbar -->
+  <main class="pt-5 mt-4"> <!-- pt-5 = padding-top for fixed navbar -->
+    <div class="container py-4">
+      <!-- Your existing tab content will appear here automatically -->
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </div>
+  </main>
 </template>
 
 <script setup>
-import HelloWorld from './components/Dashboard.vue'
 import { ref } from 'vue';
 import axios from 'axios';
+import TabsNavigation from './components/RouterTabsNavigation.vue'
 
 const message = ref('');
 
