@@ -5,26 +5,31 @@
       "label": "start vite",
       "type": "npm",
       "script": "dev",
-      "cwd": "${workspaceFolder}/frontend",
+      "path": "frontend/",
       "isBackground": true,
       "presentation": {
         "reveal": "never",
         "panel": "dedicated"
       },
-      "problemMatcher": {
-        "owner": "vite",
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "VITE",
-          "endsPattern": "Local:"
+      "problemMatcher": [
+        {
+          "base": "$tsc-watch",
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*VITE.*ready in",
+            "endsPattern": "^\\s*Local:"
+          }
         }
-      }
+      ]
     },
     {
       "label": "stop vite",
+      "type": "shell",
       "command": "echo",
-      "args": ["Vite stopped"],
-      "type": "shell"
+      "args": [
+        "Vite stopped"
+      ],
+      "problemMatcher": []
     }
   ]
 }

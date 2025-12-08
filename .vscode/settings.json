@@ -1,7 +1,18 @@
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+  "debug.javascript.autoAttachFilter": "smart",
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.defaultProfile.osx": "zsh", // or "bash" if you use bash
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": [
+        "-l"
+      ]
+    }
+  },
+  "npm.enableRunFromFolder": true
 }

@@ -7,14 +7,20 @@
       "request": "launch",
       "program": "${workspaceFolder}/backend/index.js",
       "cwd": "${workspaceFolder}/backend",
-      "runtimeArgs": ["--inspect-brk=9229"],
+      "runtimeArgs": [
+        "--inspect-brk=9229"
+      ],
       // "port": 9229,
       "envFile": "${workspaceFolder}/backend/.env",
       "console": "integratedTerminal",
       "restart": true,
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "smartStep": true,
-      "outFiles": ["${workspaceFolder}/backend/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/backend/**/*.js"
+      ]
     },
     {
       "name": "Debug Frontend (Vue + Chrome)",
@@ -22,12 +28,43 @@
       "request": "launch",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}/frontend/src",
+      "cwd": "${workspaceFolder}/frontend", // THIS IS THE KEY LINE
       "sourceMaps": true,
       "preLaunchTask": "start vite",
       "postDebugTask": "stop vite",
-      "timeout": 30000,
-      "userDataDir": false
-    }
+      "timeout": 60000, // Increased from 30000ms to 60s for slower startups
+      "trace": true, // Logs details for troubleshooting
+      "userDataDir": false, // Prevents conflicts with existing Chrome profiles
+      "runtimeExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "runtimeArgs": [
+        "--remote-debugging-port=9222",
+        "--user-data-dir=${workspaceFolder}/.vscode/vscode-chrome"
+      ]
+    },
+    // {
+    //   "name": "Attach to Chrome (Manual Launch)",
+    //   "type": "chrome",
+    //   "request": "attach",
+    //   "port": 9222,
+    //   "urlFilter": "http://localhost:5173/*",  // Matches Vite app paths
+    //   "webRoot": "${workspaceFolder}/frontend/src",
+    //   "sourceMaps": true,
+    //   "trace": true,  // Logs details for troubleshooting
+    //   "userDataDir": false,
+    //   "timeout": 60000
+    // }
+    // {
+    //   "name": "Debug Frontend (Vue + Chrome)",
+    //   "type": "chrome",
+    //   "request": "launch",
+    //   "url": "http://localhost:5173",
+    //   "webRoot": "${workspaceFolder}/frontend/src",
+    //   "sourceMaps": true,
+    //   "preLaunchTask": "start vite",
+    //   "postDebugTask": "stop vite",
+    //   "timeout": 30000,
+    //   "userDataDir": false
+    // }
   ],
   "compounds": [
     {
