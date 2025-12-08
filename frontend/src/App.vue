@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import HelloWorld from './components/Dashboard.vue'
 import { ref } from 'vue';
 import axios from 'axios';
 

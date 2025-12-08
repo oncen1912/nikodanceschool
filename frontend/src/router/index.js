@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
-  { path: '/', component: () => import('../components/HelloWorld.vue') }
+  { path: '/', component: () => import('../components/Dashboard.vue') }
 ];
 
 const router = createRouter({
