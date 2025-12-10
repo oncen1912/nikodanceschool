@@ -5,7 +5,7 @@
             <!-- Brand / Logo -->
             <router-link class="navbar-brand fw-bold" to="/home">
                 <i class="bi bi-rocket-takeoff me-2"></i>
-                NDS
+                NDS -> {{ profile?.full_name ?? 'Guest' }}
             </router-link>
 
             <!-- Toggler for mobile -->
@@ -24,6 +24,27 @@
                             <span class="d-none d-lg-inline">{{ tab.title }}</span>
                         </router-link>
                     </li>
+                    <li v-if="!user" class="nav-item">
+                        <router-link to="/login" class="nav-link">Login</router-link>
+                    </li>
+                    <li v-if="!user" class="nav-item">
+                        <router-link to="/register" class="nav-link">Register</router-link>
+                    </li>
+                    <li v-if="user" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ profile?.full_name || user.email }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><router-link to="/profile" class="dropdown-item">Profile</router-link></li>
+                            <li v-if="isAdmin" role="separator" class="dropdown-divider"></li>
+                            <li v-if="isAdmin"><router-link to="/admin" class="dropdown-item">Admin
+                                    Dashboard</router-link></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a @click="signOut" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -31,6 +52,9 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+
+const { user, profile, isAdmin, signOut } = useAuthStore()
 const tabs = [
     { path: '/home', title: 'Home', icon: 'bi bi-house-door-fill' },
     { path: '/events', title: 'Events', icon: 'bi bi-calendar-event-fill' },
