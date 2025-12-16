@@ -7,7 +7,7 @@
     </h2>
 
     <!-- Loading state -->
-    <div v-if="loading" class="text-center py-5">
+    <div v-if="eventsStore.loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
@@ -15,10 +15,14 @@
 
     <!-- Events Grid -->
     <div v-else class="row g-4">
-      <div v-for="event in events" :key="event.id" class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 hover-shadow">
+      <div v-for="event in eventsStore.events" :key="event.id" class="col-md-2 col-lg-6">
+        <!-- <div class="card h-100 shadow-sm border-0 hover-shadow"> -->
+        <div class="card h-100 shadow-sm border-0 hover-shadow overflow-hidden">
           <div class="position-relative">
-            <img :src="event.image" class="card-img-top" alt="Event image" style="height: 200px; object-fit: cover;" />
+            <!-- <img :src="event.image" class="card-img-top" alt="Event image" style="height: 200px; object-fit: cover;" /> -->
+            <img :src="event.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80'"
+              class="card-img-top" alt="{{ event.title }} poster"
+              style="height: 220px; width: 100%; object-fit: cover;" />
             <div class="position-absolute top-0 end-0 m-3 badge bg-primary fs-6">
               {{ event.date }}
             </div>
@@ -42,9 +46,23 @@
               <span class="badge me-2" :class="event.type === 'free' ? 'bg-success' : 'bg-warning'">
                 {{ event.type === 'free' ? 'Free' : 'Paid' }}
               </span>
-              <button class="btn btn-outline-primary btn-sm float-end">
+              <!-- <button class="btn btn-outline-primary btn-sm float-end">
                 Register
-                Register
+              </button> -->
+            </div>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <div>
+                <span class="badge bg-secondary me-2">
+                  {{ eventsStore.spotsLeft(event.id, event.capacity) }} spots left
+                </span>
+                <span v-if="eventsStore.isFullyBooked(event.id, event.capacity)" class="text-danger small">
+                  Fully Booked
+                </span>
+              </div>
+
+              <button class="btn btn-primary btn-sm" @click="bookEvent(event)"
+                :disabled="!authStore.isAuthenticated || eventsStore.isFullyBooked(event.id, event.capacity)">
+                {{ authStore.isAuthenticated ? 'Register' : 'Login to Register' }}
               </button>
             </div>
           </div>
@@ -53,7 +71,7 @@
     </div>
 
     <!-- Empty state -->
-    <div v-if="!loading && events.length === 0" class="text-center py-5 text-muted">
+    <div v-if="!eventsStore.loading && eventsStore.events.length === 0" class="text-center py-5 text-muted">
       <i class="bi bi-calendar-x fs-1"></i>
       <p class="mt-3">No upcoming events at the moment.</p>
     </div>
@@ -61,60 +79,44 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { useEventsStore } from '@/stores/events'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/supabase'
 
-// Fake loading + mock data (replace later with real API call)
-const loading = ref(true)
-const events = ref([])
+const eventsStore = useEventsStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
-onMounted(() => {
-  // Simulate API delay
-  setTimeout(() => {
-    events.value = [
-      {
-        id: 1,
-        title: 'Vue.js Conference 2025',
-        description: 'The biggest Vue gathering of the year with top speakers.',
-        date: '15 Mar',
-        time: '09:00 AM',
-        location: 'San Francisco, CA',
-        type: 'paid',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80'
-      },
-      {
-        id: 2,
-        title: 'Free Bootstrap Workshop',
-        description: 'Learn modern responsive design with Bootstrap 5.',
-        date: '22 Mar',
-        time: '02:00 PM',
-        location: 'Online',
-        type: 'free',
-        image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80'
-      },
-      {
-        id: 3,
-        title: 'JavaScript Meetup',
-        description: 'Networking, talks, and live coding sessions.',
-        date: '5 Apr',
-        time: '06:30 PM',
-        location: 'New York, NY',
-        type: 'free',
-        image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80'
-      },
-      {
-        id: 4,
-        title: 'Node.js Performance Masterclass',
-        description: 'Deep dive into performance optimization.',
-        date: '10 May',
-        time: '10:00 AM',
-        location: 'Austin, TX',
-        type: 'paid',
-        image: 'https://images.unsplash.com/photo-1517142089942-94ab871d59e9?w=800&q=80'
-      }
-    ]
-    loading.value = false
-  }, 800)
-})
+// Booking logic
+const bookEvent = async (event) => {
+  if (!authStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  if (eventsStore.isFullyBooked(event.id, event.capacity)) {
+    alert('This event is fully booked!')
+    return
+  }
+
+  const { error } = await supabase
+    .from('bookings')
+    .insert({
+      event_id: event.id,
+      user_id: authStore.user.id
+    })
+
+  if (error) {
+    if (error.code === '23505') {
+      alert('You are already registered for this event!')
+    } else {
+      alert('Booking failed: ' + error.message)
+    }
+  } else {
+    alert('Successfully registered! See you at the class 💃')
+  }
+}
 </script>
 
 <style scoped>

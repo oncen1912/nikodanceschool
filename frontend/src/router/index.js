@@ -10,11 +10,13 @@ const AboutTab = () => import('../components/tabs/AboutTab.vue')
 const AuthLogin = () => import('../components/AuthLogin.vue')
 const AuthRegister = () => import('../components/AuthRegister.vue')
 const AdminDashboard = () => import('../views/AdminDashboard.vue')
+const MyBookings = () => import('../views/MyBookings.vue')
 
 const routes = [
   { path: '/', redirect: '/home' },                    // default
   { path: '/home', name: 'home', component: HomeTab },
   { path: '/events', name: 'events', component: EventsTab },
+  { path: '/trainings', name: 'trainings', component: AboutTab },
   { path: '/profile', name: 'profile', component: ProfileTab },
   { path: '/settings', name: 'settings', component: SettingsTab },
   { path: '/about', name: 'about', component: AboutTab },
@@ -22,6 +24,8 @@ const routes = [
   { path: '/login', name: 'login', component: AuthLogin },
   { path: '/register', name: 'register', component: AuthRegister },
   { path: '/admin', name: 'admin', component: AdminDashboard, meta: { requiresAuth: true, requiresAdmin: true } },
+
+  { path: '/my-bookings', component: MyBookings, meta: { requiresAuth: true } },
 
   // 404 fallback
   { path: '/:pathMatch(.*)*', redirect: '/home' }

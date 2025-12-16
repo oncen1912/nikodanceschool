@@ -1,154 +1,365 @@
+<!-- frontend/src/views/AdminDashboard.vue -->
 <template>
-    <div v-if="!loading">
-        <h1 class="mb-4">
-            <i class="bi bi-person-check-fill text-primary me-2"></i>
+    <div v-if="eventsStore.loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading events...</span>
+        </div>
+    </div>
+
+    <div v-else class="container py-5">
+        <h1 class="mb-5 display-5 fw-bold text-primary">
+            <i class="bi bi-speedometer2 me-3"></i>
             Admin Dashboard
         </h1>
 
-        <!-- Stats Cards (Dance School Style) -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-white bg-primary">
+        <!-- Optional Stats (you can compute from eventsStore.events) -->
+        <div class="row mb-5 g-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary shadow">
                     <div class="card-body">
                         <h5>Total Events</h5>
-                        <h2>{{ stats.totalEvents }}</h2>
+                        <h2>{{ eventsStore.events.length }}</h2>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-white bg-success">
+            <div class="col-md-4">
+                <div class="card text-white bg-success shadow">
                     <div class="card-body">
-                        <h5>Active Students</h5>
-                        <h2>{{ stats.totalUsers }}</h2>
+                        <h5>Upcoming</h5>
+                        <h2>{{ upcomingCount }}</h2>
                     </div>
                 </div>
             </div>
-            <!-- Add more: Upcoming Classes, Revenue, etc. -->
         </div>
 
         <!-- Events Management -->
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3>Manage Events & Classes</h3>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Event
-                    </button>
-                </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Manage Events & Classes</h2>
+            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#eventModal"
+                @click="openAddModal">
+                <i class="bi bi-plus-circle me-2"></i>Add New Event
+            </button>
+        </div>
 
-                <!-- Events Table -->
-                <div class="card">
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Date</th>
-                                    <th>Location</th>
-                                    <th>Type</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="event in events" :key="event.id">
-                                    <td>{{ event.title }}</td>
-                                    <td>{{ event.date }}</td>
-                                    <td>{{ event.location }}</td>
-                                    <td><span class="badge bg-secondary">{{ event.type }}</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
-                                        <button @click="deleteEvent(event.id)"
-                                            class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="event in eventsStore.events" :key="event.id">
+                                <td><strong>{{ event.title }}</strong></td>
+                                <td>{{ formatDate(event.date) }}</td>
+                                <td>{{ event.time || '-' }}</td>
+                                <td>{{ event.location || '-' }}</td>
+                                <td>
+                                    <span class="badge" :class="getTypeBadgeClass(event.type)">
+                                        {{ event.type ? event.type.charAt(0).toUpperCase() + event.type.slice(1) :
+                                            'Event' }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal"
+                                        data-bs-target="#eventModal" @click="openEditModal(event)">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @click="deleteEvent(event.id)">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Add Event Modal -->
-        <div class="modal fade" id="addEventModal">
-            <div class="modal-dialog">
+        <!-- Modal for Add/Edit (same as before) -->
+        <!-- Single Modal for Add & Edit -->
+        <div class="modal fade" id="eventModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <form @submit.prevent="addEvent">
+                    <form @submit.prevent="saveEvent">
                         <div class="modal-header">
-                            <h5 class="modal-title">Add New Dance Event</h5>
+                            <h5 class="modal-title">
+                                {{ isEditing ? 'Edit Event' : 'Add New Event' }}
+                            </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <input v-model="newEvent.title" placeholder="Title" class="form-control mb-2" required />
-                            <input v-model="newEvent.description" placeholder="Description" class="form-control mb-2" />
-                            <input v-model="newEvent.date" type="date" class="form-control mb-2" required />
-                            <input v-model="newEvent.time" type="time" class="form-control mb-2" required />
-                            <input v-model="newEvent.location" placeholder="Location" class="form-control mb-2"
-                                required />
-                            <select v-model="newEvent.type" class="form-select mb-2">
-                                <option value="free">Free Class</option>
-                                <option value="paid">Paid Workshop</option>
-                                <option value="workshop">Special Workshop</option>
-                            </select>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Title <span class="text-danger">*</span></label>
+                                    <input v-model="currentEvent.title" type="text" class="form-control" required />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Type</label>
+                                    <select v-model="currentEvent.type" class="form-select">
+                                        <option value="free">Free</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="workshop">Workshop</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea v-model="currentEvent.description" class="form-control"
+                                        rows="3"></textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Date <span class="text-danger">*</span></label>
+                                    <input v-model="currentEvent.date" type="date" class="form-control" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Time</label>
+                                    <input v-model="currentEvent.time" type="time" class="form-control" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label class="form-label">Location</label>
+                                    <input v-model="currentEvent.location" type="text" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Capacity</label>
+                                    <input v-model.number="currentEvent.capacity" type="number" class="form-control"
+                                        min="1" />
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Image URL (optional)</label>
+                                    <input v-model="currentEvent.image_url" type="url" class="form-control"
+                                        placeholder="https://..." />
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save Event</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                {{ isEditing ? 'Update Event' : 'Create Event' }}
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Add this section after the Events Management table -->
+    <div class="mt-5">
+        <h2 class="mb-4">Bookings Overview</h2>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <div v-if="eventsStore.loading" class="text-center py-4">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+
+                <div v-else>
+                    <div v-for="event in eventsStore.events" :key="event.id" class="mb-4 pb-4 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                                <strong>{{ event.title }}</strong>
+                                <span class="text-muted small ms-2">
+                                    ({{ formatDate(event.date) }} • {{ event.location }})
+                                </span>
+                            </h5>
+                            <span class="badge bg-info fs-6">
+                                {{ eventsStore.spotsLeft(event.id, event.capacity) }} / {{ event.capacity || 20 }} spots
+                                left
+                            </span>
+                        </div>
+
+                        <div v-if="getBookingsForEvent(event.id).length === 0" class="text-muted fst-italic">
+                            No bookings yet.
+                        </div>
+
+                        <div v-else class="row g-3">
+                            <div v-for="booking in getBookingsForEvent(event.id)" :key="booking.id"
+                                class="col-md-6 col-lg-4">
+                                <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded">
+                                    <div>
+                                        <strong>{{ booking.user_email || 'User ' + booking.user_id.slice(0, 8)
+                                            }}</strong><br>
+                                        <small class="text-muted">Booked: {{ formatDateTime(booking.booked_at)
+                                            }}</small>
+                                    </div>
+                                    <button @click="cancelBooking(booking.id, event.title)"
+                                        class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/supabase'
+import { useEventsStore } from '@/stores/events'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
-const { user, isAdmin, signOut } = useAuthStore()
+const eventsStore = useEventsStore()
+const { user } = useAuthStore()
 const router = useRouter()
-const loading = ref(true)
-const events = ref([])
-const stats = ref({ totalEvents: 0, totalUsers: 0 })
-const newEvent = ref({ title: '', description: '', date: '', time: '', location: '', type: 'free' })
 
-onMounted(async () => {
-    if (!user || !isAdmin) {
+const isEditing = ref(false)
+const currentEvent = ref({
+    id: null,
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    location: '',
+    type: 'free',
+    capacity: 20,
+    image_url: ''
+})
+
+const upcomingCount = computed(() => {
+    return eventsStore.events.filter(e => new Date(e.date) >= new Date()).length
+})
+
+onMounted(() => {
+    if (!user) {
         router.push('/login')
         return
     }
+    // Data is already loaded + realtime in main.js — no need to fetch again!
+    // Get all unique user_ids from bookings
+    const userIds = [...new Set(eventsStore.bookings.map(b => b.user_id))]
 
-    // Fetch events
-    const { data: eventsData } = await supabase.from('events').select('*').order('created_at', { ascending: false })
-    events.value = eventsData || []
-
-    // Fetch stats
-    const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true })
-    const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-    stats.value = { totalEvents: eventCount, totalUsers: userCount }
-
-    loading.value = false
+    // Fetch all emails in parallel
+    await Promise.all(userIds.map(id => fetchUserEmail(id)))
 })
 
-const addEvent = async () => {
-    const { data, error } = await supabase
-        .from('events')
-        .insert([{ ...newEvent.value, created_by: user.value.id }])
-        .select()
-    if (error) alert(error.message)
-    else {
-        events.value.push(data[0])
-        newEvent.value = { title: '', description: '', date: '', time: '', location: '', type: 'free' }
-        document.querySelector('#addEventModal .btn-close').click()
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const getTypeBadgeClass = (type) => ({
+    'bg-success': type === 'free',
+    'bg-warning text-dark': type === 'paid',
+    'bg-info': type === 'workshop'
+})
+
+const openAddModal = () => {
+    isEditing.value = false
+    currentEvent.value = { title: '', description: '', date: '', time: '', location: '', type: 'free', capacity: 20, image_url: '' }
+}
+
+const openEditModal = (event) => {
+    isEditing.value = true
+    currentEvent.value = { ...event }
+}
+
+const saveEvent = async () => {
+    try {
+        if (isEditing.value) {
+            const { id, ...updateData } = currentEvent.value
+            await supabase.from('events').update(updateData).eq('id', id)
+        } else {
+            await supabase.from('events').insert({
+                ...currentEvent.value,
+                created_by: user.id
+            })
+        }
+        // No need to refetch — realtime will update eventsStore.events automatically!
+        document.querySelector('#eventModal .btn-close').click()
+    } catch (error) {
+        alert('Error: ' + error.message)
     }
 }
 
 const deleteEvent = async (id) => {
-    if (confirm('Delete this event?')) {
-        await supabase.from('events').delete().eq('id', id)
-        events.value = events.value.filter(e => e.id !== id)
+    if (!confirm('Delete this event?')) return
+    await supabase.from('events').delete().eq('id', id)
+    // Realtime handles removal
+}
+
+// Cache for user emails: userId → email or 'loading...'
+const userEmails = ref({})  // { 'uuid123': 'john@example.com', 'uuid456': 'loading...' }
+
+// Async function to fetch email (admin API)
+const fetchUserEmail = async (userId) => {
+    // Return cached if exists
+    if (userEmails.value[userId]) {
+        return userEmails.value[userId]
     }
+
+    // Mark as loading
+    userEmails.value[userId] = 'Loading...'
+
+    try {
+        // Use service_role key (only safe in dev or behind Edge Function)
+        const { data, error } = await supabase.auth.admin.getUserById(userId)
+        if (error) throw error
+
+        const email = data?.user?.email || 'unknown@example.com'
+        userEmails.value[userId] = email
+        return email
+    } catch (err) {
+        console.error('Failed to fetch user email:', err)
+        userEmails.value[userId] = 'Error'
+        return 'Error'
+    }
+}
+
+
+// Sync version for template (safe)
+const getUserEmail = (userId) => {
+    return userEmails.value[userId] || 'Loading...'
+}
+
+// Get bookings for event (now uses cached emails)
+const getBookingsForEvent = (eventId) => {
+    return eventsStore.bookings
+        .filter(b => b.event_id === eventId)
+        .map(b => ({
+            ...b,
+            user_email: getUserEmail(b.user_id)
+        }))
+        .sort((a, b) => new Date(b.booked_at) - new Date(a.booked_at))
+}
+
+// Cancel booking
+const cancelBooking = async (bookingId, eventTitle) => {
+    if (!confirm(`Cancel booking for "${eventTitle}"?`)) return
+
+    const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId)
+
+    if (error) {
+        alert('Error: ' + error.message)
+    } else {
+        alert('Booking cancelled successfully')
+    }
+}
+const formatDateTime = (isoString) => {
+    return new Date(isoString).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+    })
 }
 </script>

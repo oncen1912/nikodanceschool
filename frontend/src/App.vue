@@ -1,13 +1,5 @@
 <template>
-  <!-- <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div> -->
-  <!-- Include the tab navigation -->
+
   <TabsNavigation />
 
   <!-- Main content starts below navbar -->
@@ -24,20 +16,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
 import TabsNavigation from './components/RouterTabsNavigation.vue'
-
-const message = ref('');
-
-const fetchData = async () => {
-  try {
-    const response = await axios.get('http://localhost:3000/');
-    message.value = response.data;
-  } catch (error) {
-    console.error(error);
-  }
-};
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@
             <!-- Brand / Logo -->
             <router-link class="navbar-brand fw-bold" to="/home">
                 <i class="bi bi-rocket-takeoff me-2"></i>
-                NDS -> {{ profile?.full_name ?? 'Guest' }}
+                NDS - Niko Dance School
             </router-link>
 
             <!-- Toggler for mobile -->
@@ -36,6 +36,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><router-link to="/profile" class="dropdown-item">Profile</router-link></li>
+                            <li><router-link to="/my-bookings" class="dropdown-item">My bookings</router-link></li>
                             <li v-if="isAdmin" role="separator" class="dropdown-divider"></li>
                             <li v-if="isAdmin"><router-link to="/admin" class="dropdown-item">Admin
                                     Dashboard</router-link></li>
@@ -58,8 +59,8 @@ const { user, profile, isAdmin, signOut } = useAuthStore()
 const tabs = [
     { path: '/home', title: 'Home', icon: 'bi bi-house-door-fill' },
     { path: '/events', title: 'Events', icon: 'bi bi-calendar-event-fill' },
-    { path: '/profile', title: 'Profile', icon: 'bi bi-person-circle' },
-    { path: '/settings', title: 'Settings', icon: 'bi bi-gear-fill' },
+    { path: '/trainings', title: 'Trainings', icon: 'bi bi-calendar-event-fill' },
+    // { path: '/settings', title: 'Settings', icon: 'bi bi-gear-fill' },
     { path: '/about', title: 'About', icon: 'bi bi-info-circle-fill' },
 ]
 </script>
