@@ -2,8 +2,8 @@ name: Build and Deploy to Exoscale
 
 on:
   push:
-    # branches: [ main ]          # Change if your default branch is different
-      - 'v*.*.*'              # Only deploy on tags like v1.0.0
+    - 'v*.*.*'              # Only deploy on tags like v1.0.0
+    
   workflow_dispatch:            # Allows manual trigger from GitHub UI
 
 jobs:
