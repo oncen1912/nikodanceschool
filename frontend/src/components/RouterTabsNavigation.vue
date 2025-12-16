@@ -59,7 +59,7 @@ const { user, profile, isAdmin, signOut } = useAuthStore()
 const tabs = [
     { path: '/home', title: 'Home', icon: 'bi bi-house-door-fill' },
     { path: '/events', title: 'Events', icon: 'bi bi-calendar-event-fill' },
-    { path: '/trainings', title: 'Trainings', icon: 'bi bi-calendar-event-fill' },
+    // { path: '/trainings', title: 'Trainings', icon: 'bi bi-calendar-event-fill' },
     // { path: '/settings', title: 'Settings', icon: 'bi bi-gear-fill' },
     { path: '/about', title: 'About', icon: 'bi bi-info-circle-fill' },
 ]

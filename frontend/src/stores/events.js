@@ -13,7 +13,7 @@ export const useEventsStore = defineStore('events', () => {
         loading.value = true
         const [{ data: eventsData }, { data: bookingsData }] = await Promise.all([
             supabase.from('events').select('*').order('date', { ascending: true }),
-            supabase.from('bookings').select('*')
+            supabase.from('bookings').select('id, event_id, user_id, booked_at, user_email')  // ← add user_email
         ])
 
         events.value = eventsData || []

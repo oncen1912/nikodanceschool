@@ -30,6 +30,14 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-info shadow">
+                    <div class="card-body">
+                        <h5>Bookings</h5>
+                        <h2>{{ bookingCount }}</h2>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Events Management -->
@@ -152,51 +160,52 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Add this section after the Events Management table -->
-    <div class="mt-5">
-        <h2 class="mb-4">Bookings Overview</h2>
+        <!-- Add this section after the Events Management table -->
+        <div class="mt-5">
+            <h2 class="mb-4">Bookings Overview</h2>
 
-        <div class="card shadow">
-            <div class="card-body">
-                <div v-if="eventsStore.loading" class="text-center py-4">
-                    <div class="spinner-border text-primary"></div>
-                </div>
+            <div class="card shadow">
+                <div class="card-body">
+                    <div v-if="eventsStore.loading" class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
 
-                <div v-else>
-                    <div v-for="event in eventsStore.events" :key="event.id" class="mb-4 pb-4 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">
-                                <strong>{{ event.title }}</strong>
-                                <span class="text-muted small ms-2">
-                                    ({{ formatDate(event.date) }} • {{ event.location }})
+                    <div v-else>
+                        <div v-for="event in eventsStore.events" :key="event.id" class="mb-4 pb-4 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <strong>{{ event.title }}</strong>
+                                    <span class="text-muted small ms-2">
+                                        ({{ formatDate(event.date) }} • {{ event.location }})
+                                    </span>
+                                </h5>
+                                <span class="badge bg-info fs-6">
+                                    {{ eventsStore.spotsLeft(event.id, event.capacity) }} / {{ event.capacity || 20 }}
+                                    spots
+                                    left
                                 </span>
-                            </h5>
-                            <span class="badge bg-info fs-6">
-                                {{ eventsStore.spotsLeft(event.id, event.capacity) }} / {{ event.capacity || 20 }} spots
-                                left
-                            </span>
-                        </div>
+                            </div>
 
-                        <div v-if="getBookingsForEvent(event.id).length === 0" class="text-muted fst-italic">
-                            No bookings yet.
-                        </div>
+                            <div v-if="getBookingsForEvent(event.id).length === 0" class="text-muted fst-italic">
+                                No bookings yet.
+                            </div>
 
-                        <div v-else class="row g-3">
-                            <div v-for="booking in getBookingsForEvent(event.id)" :key="booking.id"
-                                class="col-md-6 col-lg-4">
-                                <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded">
-                                    <div>
-                                        <strong>{{ booking.user_email || 'User ' + booking.user_id.slice(0, 8)
+                            <div v-else class="row g-3">
+                                <div v-for="booking in getBookingsForEvent(event.id)" :key="booking.id"
+                                    class="col-md-6 col-lg-4">
+                                    <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded">
+                                        <div>
+                                            <strong>{{ booking.user_email || 'User ' + booking.user_id.slice(0, 8)
                                             }}</strong><br>
-                                        <small class="text-muted">Booked: {{ formatDateTime(booking.booked_at)
+                                            <small class="text-muted">Booked: {{ formatDateTime(booking.booked_at)
                                             }}</small>
+                                        </div>
+                                        <button @click="cancelBooking(booking.id, event.title)"
+                                            class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
                                     </div>
-                                    <button @click="cancelBooking(booking.id, event.title)"
-                                        class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-x-circle"></i> Cancel
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -236,17 +245,17 @@ const upcomingCount = computed(() => {
     return eventsStore.events.filter(e => new Date(e.date) >= new Date()).length
 })
 
+const bookingCount = computed(() => {
+    return eventsStore.bookings.length
+})
+
 onMounted(() => {
     if (!user) {
         router.push('/login')
         return
     }
-    // Data is already loaded + realtime in main.js — no need to fetch again!
-    // Get all unique user_ids from bookings
-    const userIds = [...new Set(eventsStore.bookings.map(b => b.user_id))]
 
-    // Fetch all emails in parallel
-    await Promise.all(userIds.map(id => fetchUserEmail(id)))
+    // Async helper function (allowed inside non-async)
 })
 
 const formatDate = (dateStr) => {
@@ -294,48 +303,10 @@ const deleteEvent = async (id) => {
     // Realtime handles removal
 }
 
-// Cache for user emails: userId → email or 'loading...'
-const userEmails = ref({})  // { 'uuid123': 'john@example.com', 'uuid456': 'loading...' }
-
-// Async function to fetch email (admin API)
-const fetchUserEmail = async (userId) => {
-    // Return cached if exists
-    if (userEmails.value[userId]) {
-        return userEmails.value[userId]
-    }
-
-    // Mark as loading
-    userEmails.value[userId] = 'Loading...'
-
-    try {
-        // Use service_role key (only safe in dev or behind Edge Function)
-        const { data, error } = await supabase.auth.admin.getUserById(userId)
-        if (error) throw error
-
-        const email = data?.user?.email || 'unknown@example.com'
-        userEmails.value[userId] = email
-        return email
-    } catch (err) {
-        console.error('Failed to fetch user email:', err)
-        userEmails.value[userId] = 'Error'
-        return 'Error'
-    }
-}
-
-
-// Sync version for template (safe)
-const getUserEmail = (userId) => {
-    return userEmails.value[userId] || 'Loading...'
-}
-
 // Get bookings for event (now uses cached emails)
 const getBookingsForEvent = (eventId) => {
     return eventsStore.bookings
         .filter(b => b.event_id === eventId)
-        .map(b => ({
-            ...b,
-            user_email: getUserEmail(b.user_id)
-        }))
         .sort((a, b) => new Date(b.booked_at) - new Date(a.booked_at))
 }
 
