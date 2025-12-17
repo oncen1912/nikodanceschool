@@ -33,8 +33,8 @@
             <div class="col-md-4">
                 <div class="card text-white bg-info shadow">
                     <div class="card-body">
-                        <h5>Bookings</h5>
-                        <h2>{{ bookingCount }}</h2>
+                        <h5>Users</h5>
+                        <h2>{{ userStore.usersCount }}</h2>
                     </div>
                 </div>
             </div>
@@ -225,7 +225,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
 const eventsStore = useEventsStore()
-const { user } = useAuthStore()
+const userStore = useAuthStore()
 const router = useRouter()
 
 const isEditing = ref(false)
@@ -250,7 +250,7 @@ const bookingCount = computed(() => {
 })
 
 onMounted(() => {
-    if (!user) {
+    if (!userStore.isAuthenticated || !userStore.isAdmin) {
         router.push('/login')
         return
     }
@@ -287,7 +287,7 @@ const saveEvent = async () => {
         } else {
             await supabase.from('events').insert({
                 ...currentEvent.value,
-                created_by: user.id
+                created_by: userStore.id
             })
         }
         // No need to refetch — realtime will update eventsStore.events automatically!

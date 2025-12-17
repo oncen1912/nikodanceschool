@@ -1,87 +1,83 @@
 <!-- frontend/src/components/RouterTabsNavigation.vue -->
 <template>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
-        <div class="container">
-            <!-- Brand / Logo -->
-            <router-link class="navbar-brand fw-bold" to="/home">
-                <i class="bi bi-rocket-takeoff me-2"></i>
-                NDS - Niko Dance School
-            </router-link>
+    <div class="sticky-top bg-white shadow-sm">
+        <!-- Bootstrap Tabs using router-link -->
+        <ul class="nav nav-tabs mb-4" id="routerTab" role="tablist">
+            <li class="nav-item" role="presentation" v-for="tab in visibleTabs" :key="tab.path">
+                <router-link :to="tab.path" class="nav-link d-flex align-items-center" active-class="active"
+                    exact-active-class="active" role="tab">
+                    <i :class="tab.icon" class="me-2"></i>
+                    {{ tab.title }}
+                </router-link>
+            </li>
 
-            <!-- Toggler for mobile -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <!-- Login/Logout in tabs (optional - or move to navbar) -->
+            <li class="nav-item ms-auto" v-if="!authStore.isAuthenticated">
+                <router-link to="/login" class="nav-link">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Login
+                </router-link>
+            </li>
+            <li class="nav-item ms-auto" v-else>
+                <a class="nav-link" @click.prevent="authStore.signOut">
+                    <i class="bi bi-box-arrow-left me-2"></i> Logout
+                </a>
+            </li>
+        </ul>
 
-            <!-- Navigation Tabs (converted to navbar links) -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto"> <!-- ms-auto = push to right -->
-                    <li class="nav-item" v-for="tab in tabs" :key="tab.path">
-                        <router-link :to="tab.path" class="nav-link d-flex align-items-center px-3"
-                            active-class="active" exact-active-class="active">
-                            <i :class="tab.icon" class="me-2"></i>
-                            <span class="d-none d-lg-inline">{{ tab.title }}</span>
-                        </router-link>
-                    </li>
-                    <li v-if="!user" class="nav-item">
-                        <router-link to="/login" class="nav-link">Login</router-link>
-                    </li>
-                    <li v-if="!user" class="nav-item">
-                        <router-link to="/register" class="nav-link">Register</router-link>
-                    </li>
-                    <li v-if="user" class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{ profile?.full_name || user.email }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><router-link to="/profile" class="dropdown-item">Profile</router-link></li>
-                            <li><router-link to="/my-bookings" class="dropdown-item">My bookings</router-link></li>
-                            <li v-if="isAdmin" role="separator" class="dropdown-divider"></li>
-                            <li v-if="isAdmin"><router-link to="/admin" class="dropdown-item">Admin
-                                    Dashboard</router-link></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a @click="signOut" class="dropdown-item">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    </div>
+
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
-const { user, profile, isAdmin, signOut } = useAuthStore()
-const tabs = [
+const authStore = useAuthStore()
+
+// Base public tabs
+const baseTabs = [
     { path: '/home', title: 'Home', icon: 'bi bi-house-door-fill' },
     { path: '/events', title: 'Events', icon: 'bi bi-calendar-event-fill' },
-    // { path: '/trainings', title: 'Trainings', icon: 'bi bi-calendar-event-fill' },
-    // { path: '/settings', title: 'Settings', icon: 'bi bi-gear-fill' },
     { path: '/about', title: 'About', icon: 'bi bi-info-circle-fill' },
 ]
+
+// Dynamic tabs based on login state
+const visibleTabs = computed(() => {
+    let tabs = [...baseTabs]
+
+    if (authStore.isAuthenticated) {
+        tabs.push({ path: '/my-bookings', title: 'My Bookings', icon: 'bi bi-bookmark-heart-fill' })
+    }
+
+    if (authStore.isAdmin) {
+        tabs.push({ path: '/admin', title: 'Admin', icon: 'bi bi-speedometer2' })
+    }
+
+    return tabs
+})
 </script>
 
 <style scoped>
-/* .nav-link {
+/* Active state styling */
+.nav-link {
     color: #495057;
-    padding: 0.8rem 1.5rem;
-} */
-
-/* Active link style */
-.nav-link.active {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    font-weight: 600;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
 }
 
-/* Smooth fade transition between tabs */
+.nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.nav-link.active {
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+
+/* Fade transition */
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.25s ease;
+    transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,
@@ -89,8 +85,10 @@ const tabs = [
     opacity: 0;
 }
 
-.navbar {
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .nav-link {
+        font-size: 0.9rem;
+    }
 }
 </style>

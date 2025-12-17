@@ -6,7 +6,7 @@ import { ref, computed } from 'vue'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const profile = ref(null)
-  const loading = ref(true)          // ← NEW: know when we're ready
+  const loading = ref(true)
 
   // 1. On store creation: restore session immediately
   const initAuth = async () => {
@@ -80,6 +80,13 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
+  const countUsers = () => {
+    return 1
+    // const { count, error } = supabase.from('profiles').select('*', { count: 'exact', head: true })
+    // if (error) throw error
+    // return count
+  }
+
   // Computed
   const isAdmin = computed(() => profile.value?.role === 'admin')
   const isAuthenticated = computed(() => !!user.value)
@@ -92,11 +99,12 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isAdmin,
 
-    initAuth,        // ← exported
+    initAuth,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
     fetchProfile,
+    countUsers
   }
 })

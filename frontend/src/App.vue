@@ -1,10 +1,10 @@
 <template>
 
-  <TabsNavigation />
 
   <!-- Main content starts below navbar -->
-  <main class="pt-5 mt-4"> <!-- pt-5 = padding-top for fixed navbar -->
-    <div class="container py-4">
+  <main class="pt-3"> <!-- pt-5 = padding-top for fixed navbar -->
+    <div class="container py-3">
+      <TabsNavigation />
       <!-- Your existing tab content will appear here automatically -->
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
