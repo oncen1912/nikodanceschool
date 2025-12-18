@@ -14,9 +14,9 @@
               <input v-model="password" type="password" class="form-control" required />
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
-            <button @click="googleLogin" class="btn btn-outline-danger w-100">
+            <!-- <button @click="googleLogin" class="btn btn-outline-danger w-100">
               <i class="bi bi-google me-2"></i>Continue with Google
-            </button>
+            </button> -->
             <p class="text-center mt-3">
               New student? <router-link to="/register">Register here</router-link>
             </p>

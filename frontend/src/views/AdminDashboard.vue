@@ -34,7 +34,7 @@
                 <div class="card text-white bg-info shadow">
                     <div class="card-body">
                         <h5>Users</h5>
-                        <h2>{{ userStore.usersCount }}</h2>
+                        <h2>{{ userStore.userCount }}</h2>
                     </div>
                 </div>
             </div>
@@ -175,7 +175,8 @@
                         <div v-for="event in eventsStore.events" :key="event.id" class="mb-4 pb-4 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="mb-0">
-                                    <strong>{{ event.title }}</strong>
+                                    <strong>{{ event.title }}</strong> <span class="badge text-bg-info">{{
+                                        getBookingsForEvent(event.id).length }}</span>
                                     <span class="text-muted small ms-2">
                                         ({{ formatDate(event.date) }} • {{ event.location }})
                                     </span>
@@ -287,7 +288,7 @@ const saveEvent = async () => {
         } else {
             await supabase.from('events').insert({
                 ...currentEvent.value,
-                created_by: userStore.id
+                created_by: userStore.user.id
             })
         }
         // No need to refetch — realtime will update eventsStore.events automatically!

@@ -11,17 +11,36 @@
                 </router-link>
             </li>
 
-            <!-- Login/Logout in tabs (optional - or move to navbar) -->
             <li class="nav-item ms-auto" v-if="!authStore.isAuthenticated">
                 <router-link to="/login" class="nav-link">
                     <i class="bi bi-box-arrow-in-right me-2"></i> Login
                 </router-link>
             </li>
-            <li class="nav-item ms-auto" v-else>
-                <a class="nav-link" @click.prevent="authStore.signOut">
-                    <i class="bi bi-box-arrow-left me-2"></i> Logout
-                </a>
+            <li class="nav-item ms-auto dropdown" v-else>
+                <a class="nav-link dropdown-toggle " data-bs-toggle="dropdown" href="#" role="button"
+                    aria-expanded="false"><i class="bi bi-person-circle"></i> {{ authStore.user.user_metadata.full_name
+                    }}</a>
+                <ul class="dropdown-menu">
+                    <li class="nav-item ms-auto" v-if="authStore.isAdmin">
+                        <router-link to="/admin" class="nav-link">
+                            <i class="bi bi-speedometer2 me-2"></i> Admin {{ authStore.usersCount }}
+                        </router-link>
+                    </li>
+                    <li class="nav-item ms-auto">
+                        <router-link to="/my-bookings" class="nav-link">
+                            <i class="bi bi-bookmark-heart-fill me-2"></i> My Bookings
+                        </router-link>
+                    </li>
+                    <hr class="dropdown-divider">
+                    <!-- Login/Logout in tabs (optional - or move to navbar) -->
+                    <li class="nav-item ms-auto">
+                        <a class="nav-link" @click.prevent="authStore.signOut">
+                            <i class="bi bi-box-arrow-left me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
             </li>
+
         </ul>
 
     </div>
@@ -45,13 +64,13 @@ const baseTabs = [
 const visibleTabs = computed(() => {
     let tabs = [...baseTabs]
 
-    if (authStore.isAuthenticated) {
-        tabs.push({ path: '/my-bookings', title: 'My Bookings', icon: 'bi bi-bookmark-heart-fill' })
-    }
+    // if (authStore.isAuthenticated) {
+    //     tabs.push({ path: '/my-bookings', title: 'My Bookings', icon: 'bi bi-bookmark-heart-fill' })
+    // }
 
-    if (authStore.isAdmin) {
-        tabs.push({ path: '/admin', title: 'Admin', icon: 'bi bi-speedometer2' })
-    }
+    // if (authStore.isAdmin) {
+    //     tabs.push({ path: '/admin', title: 'Admin', icon: 'bi bi-speedometer2' })
+    // }
 
     return tabs
 })

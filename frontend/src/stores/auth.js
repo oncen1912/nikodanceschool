@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const profile = ref(null)
   const loading = ref(true)
+  const userCount = ref(0)
 
   // 1. On store creation: restore session immediately
   const initAuth = async () => {
@@ -30,10 +31,12 @@ export const useAuthStore = defineStore('auth', () => {
         await fetchProfile()
       }
     })
-  }
 
-  // Call it immediately when store is created
-  // initAuth()
+    // count users...
+    const { count, error } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+    if (error) throw error
+    userCount.value = count || 0
+  }
 
   // Fetch profile + role
   const fetchProfile = async () => {
@@ -80,13 +83,6 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
-  const countUsers = () => {
-    return 1
-    // const { count, error } = supabase.from('profiles').select('*', { count: 'exact', head: true })
-    // if (error) throw error
-    // return count
-  }
-
   // Computed
   const isAdmin = computed(() => profile.value?.role === 'admin')
   const isAuthenticated = computed(() => !!user.value)
@@ -105,6 +101,6 @@ export const useAuthStore = defineStore('auth', () => {
     signInWithGoogle,
     signOut,
     fetchProfile,
-    countUsers
+    userCount: userCount
   }
 })
