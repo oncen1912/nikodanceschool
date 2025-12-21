@@ -7,7 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const profile = ref(null)
   const loading = ref(true)
-  const userCount = ref(0)
+  const users = ref(0)
 
   // 1. On store creation: restore session immediately
   const initAuth = async () => {
@@ -32,10 +32,6 @@ export const useAuthStore = defineStore('auth', () => {
       }
     })
 
-    // count users...
-    const { count, error } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-    if (error) throw error
-    userCount.value = count || 0
   }
 
   // Fetch profile + role
@@ -100,7 +96,6 @@ export const useAuthStore = defineStore('auth', () => {
     signIn,
     signInWithGoogle,
     signOut,
-    fetchProfile,
-    userCount: userCount
+    fetchProfile
   }
 })

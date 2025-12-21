@@ -34,7 +34,7 @@
                 <div class="card text-white bg-info shadow">
                     <div class="card-body">
                         <h5>Users</h5>
-                        <h2>{{ userStore.userCount }}</h2>
+                        <h2>{{ usersStore.users.length }}</h2>
                     </div>
                 </div>
             </div>
@@ -49,6 +49,7 @@
             </button>
         </div>
 
+        <!-- Events Management -->
         <div class="card shadow">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -198,9 +199,9 @@
                                     <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded">
                                         <div>
                                             <strong>{{ booking.user_email || 'User ' + booking.user_id.slice(0, 8)
-                                            }}</strong><br>
+                                                }}</strong><br>
                                             <small class="text-muted">Booked: {{ formatDateTime(booking.booked_at)
-                                            }}</small>
+                                                }}</small>
                                         </div>
                                         <button @click="cancelBooking(booking.id, event.title)"
                                             class="btn btn-sm btn-outline-danger">
@@ -210,6 +211,50 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management Section -->
+        <div class="mt-5">
+            <h2 class="mb-4">User Management ({{ usersStore.users.length }} total)</h2>
+
+            <div class="card shadow">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="user in usersStore.users" :key="user.id">
+                                    <td>
+                                        <strong>{{ user.full_name || 'No name' }}</strong>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge"
+                                            :class="user.role === 'admin' ? 'bg-danger' : 'bg-secondary'">
+                                            {{ user.role || 'student' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ formatDate(user.created_at) }}</td>
+                                    <td>
+                                        <!-- Future: Make admin / Delete user -->
+                                        <button class="btn btn-sm btn-outline-primary" disabled>
+                                            Edit Role
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -224,10 +269,12 @@ import { supabase } from '@/supabase'
 import { useEventsStore } from '@/stores/events'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useUsersStore } from '@/stores/users'
 
-const eventsStore = useEventsStore()
-const userStore = useAuthStore()
 const router = useRouter()
+const eventsStore = useEventsStore()
+const authStore = useAuthStore()
+const usersStore = useUsersStore()
 
 const isEditing = ref(false)
 const currentEvent = ref({
@@ -251,7 +298,7 @@ const bookingCount = computed(() => {
 })
 
 onMounted(() => {
-    if (!userStore.isAuthenticated || !userStore.isAdmin) {
+    if (!authStore.isAuthenticated || !authStore.isAdmin) {
         router.push('/login')
         return
     }
@@ -288,7 +335,7 @@ const saveEvent = async () => {
         } else {
             await supabase.from('events').insert({
                 ...currentEvent.value,
-                created_by: userStore.user.id
+                created_by: authStore.user.id
             })
         }
         // No need to refetch — realtime will update eventsStore.events automatically!

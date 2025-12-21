@@ -5,6 +5,7 @@ import App from './App.vue'
 import router from './router';
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore } from '@/stores/events'
+import { useUsersStore } from '@/stores/users'
 
 // Bootstrap CSS & JS
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -26,6 +27,10 @@ await authStore.initAuth()   // ← this line fixes everything
 const eventsStore = useEventsStore()
 eventsStore.fetchEvents()           // initial load
 eventsStore.enableRealtime()        // live updates forever
+
+const usersStore = useUsersStore()
+usersStore.fetchUsers()
+usersStore.enableRealtime()
 
 app.use(Toast, { position: 'top-right' })
 app.mount('#app');
