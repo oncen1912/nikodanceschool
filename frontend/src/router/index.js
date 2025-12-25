@@ -4,22 +4,27 @@ import { useAuthStore } from '../stores/auth'
 // Lazy-load tab views (better performance)
 const HomeTab = () => import('../components/tabs/HomeTab.vue')
 const EventsTab = () => import('../components/tabs/EventsTab.vue')
+const NewsTab = () => import('../components/tabs/NewsTab.vue')
 const ProfileTab = () => import('../components/tabs/ProfileTab.vue')
 const SettingsTab = () => import('../components/tabs/SettingsTab.vue')
 const AboutTab = () => import('../components/tabs/AboutTab.vue')
+
 const AuthLogin = () => import('../components/AuthLogin.vue')
 const AuthRegister = () => import('../components/AuthRegister.vue')
 const MyBookings = () => import('../views/MyBookings.vue')
 const AdminDashboard = () => import('../views/AdminDashboard.vue')
+const ArticleDetail = () => import('../views/ArticleDetail.vue')
 
 const routes = [
   { path: '/', redirect: '/home' },                    // default
   { path: '/home', name: 'home', component: HomeTab },
   { path: '/events', name: 'events', component: EventsTab },
-  { path: '/trainings', name: 'trainings', component: AboutTab },
   { path: '/profile', name: 'profile', component: ProfileTab },
   { path: '/settings', name: 'settings', component: SettingsTab },
-  { path: '/about', name: 'about', component: AboutTab },
+  { path: '/news', name: 'news', component: NewsTab },
+{
+  path: '/news/:id',name: 'article-detail',component: ArticleDetail,props: true
+},  { path: '/about', name: 'about', component: AboutTab },
 
   { path: '/login', name: 'login', component: AuthLogin },
   { path: '/register', name: 'register', component: AuthRegister },

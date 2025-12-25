@@ -121,8 +121,22 @@
 
                                 <div class="col-md-12">
                                     <label class="form-label">Description</label>
-                                    <textarea v-model="currentEvent.description" class="form-control"
-                                        rows="3"></textarea>
+                                    <Editor v-model="currentEvent.description" licenseKey='gpl' :init="{
+                                        height: 400,
+                                        menubar: false,
+                                        plugins: [
+                                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                            'preview', 'anchor', 'searchreplace', 'visualblocks',
+                                            'code', 'fullscreen', 'insertdatetime', 'media', 'table',
+                                            'code', 'help', 'wordcount'
+                                        ],
+                                        toolbar:
+                                            'undo redo | blocks | bold italic forecolor | ' +
+                                            'alignleft aligncenter alignright alignjustify | ' +
+                                            'bullist numlist outdent indent | link image | ' +
+                                            'removeformat | code | help',
+                                        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }'
+                                    }" />
                                 </div>
 
                                 <div class="col-md-6">
@@ -199,9 +213,9 @@
                                     <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded">
                                         <div>
                                             <strong>{{ booking.user_email || 'User ' + booking.user_id.slice(0, 8)
-                                                }}</strong><br>
+                                            }}</strong><br>
                                             <small class="text-muted">Booked: {{ formatDateTime(booking.booked_at)
-                                                }}</small>
+                                            }}</small>
                                         </div>
                                         <button @click="cancelBooking(booking.id, event.title)"
                                             class="btn btn-sm btn-outline-danger">
@@ -212,6 +226,126 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Articles Management Section -->
+        <div class="mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Articles & News</h2>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#articleModal"
+                    @click="openAddArticle">
+                    <i class="bi bi-plus-circle me-2"></i>New Article
+                </button>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body p-0">
+                    <div v-if="articlesStore.loading" class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                    <div v-else class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Published</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="article in articlesStore.articles" :key="article.id">
+                                    <td>
+                                        <strong>{{ article.title }}</strong>
+                                        <small class="text-muted d-block">{{ article.excerpt || 'No excerpt' }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                            :class="article.is_published ? 'bg-success' : 'bg-secondary'">
+                                            {{ article.is_published ? 'Published' : 'Draft' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ formatDate(article.published_at || article.created_at) }}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal"
+                                            data-bs-target="#articleModal" @click="openEditArticle(article)">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                            @click="deleteArticle(article.id, article.title)">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Article Modal -->
+        <div class="modal fade" id="articleModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <form @submit.prevent="saveArticle">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ isEditingArticle ? 'Edit Article' : 'New Article' }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Title *</label>
+                                    <input v-model="currentArticle.title" type="text" class="form-control" required />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Excerpt</label>
+                                    <textarea v-model="currentArticle.excerpt" class="form-control" rows="3"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Featured Image URL</label>
+                                    <input v-model="currentArticle.image_url" type="url" class="form-control" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Content *</label>
+                                    <Editor v-model="currentArticle.content" licenseKey='gpl' :init="{
+                                        height: 500,
+                                        menubar: true,
+                                        plugins: [
+                                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                            'preview', 'anchor', 'searchreplace', 'visualblocks',
+                                            'code', 'fullscreen', 'insertdatetime', 'media', 'table',
+                                            'help', 'wordcount'
+                                        ],
+                                        toolbar:
+                                            'undo redo | blocks | bold italic underline | ' +
+                                            'alignleft aligncenter alignright alignjustify | ' +
+                                            'bullist numlist outdent indent | link image media | ' +
+                                            'removeformat | code | fullscreen | help',
+                                        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+                                        // Self-hosted path
+                                    }" />
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input v-model="currentArticle.is_published" class="form-check-input"
+                                            type="checkbox" id="publish">
+                                        <label class="form-check-label" for="publish">
+                                            Publish immediately
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                {{ isEditingArticle ? 'Update' : 'Create' }} Article
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -230,7 +364,7 @@
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Joined</th>
-                                    <th>Actions</th>
+                                    <!-- <th>Actions</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -246,12 +380,11 @@
                                         </span>
                                     </td>
                                     <td>{{ formatDate(user.created_at) }}</td>
-                                    <td>
-                                        <!-- Future: Make admin / Delete user -->
-                                        <button class="btn btn-sm btn-outline-primary" disabled>
-                                            Edit Role
-                                        </button>
-                                    </td>
+                                    <!-- <td>
+                                    <button class="btn btn-sm btn-outline-primary" disabled>
+                                        Edit Role
+                                    </button>
+                                    </td> -->
                                 </tr>
                             </tbody>
                         </table>
@@ -270,11 +403,14 @@ import { useEventsStore } from '@/stores/events'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useUsersStore } from '@/stores/users'
+import { useArticlesStore } from '@/stores/articles'
+import Editor from '@tinymce/tinymce-vue'
 
 const router = useRouter()
 const eventsStore = useEventsStore()
 const authStore = useAuthStore()
 const usersStore = useUsersStore()
+const articlesStore = useArticlesStore()
 
 const isEditing = ref(false)
 const currentEvent = ref({
@@ -373,6 +509,56 @@ const cancelBooking = async (bookingId, eventTitle) => {
         alert('Booking cancelled successfully')
     }
 }
+
+// Articles Management
+const isEditingArticle = ref(false)
+const currentArticle = ref({
+    id: null,
+    title: '',
+    excerpt: '',
+    content: '<p></p>',
+    image_url: '',
+    is_published: false
+})
+
+const openAddArticle = () => {
+    isEditingArticle.value = false
+    currentArticle.value = {
+        title: '',
+        excerpt: '',
+        content: '<p></p>',
+        image_url: '',
+        is_published: false
+    }
+}
+
+const openEditArticle = (article) => {
+    isEditingArticle.value = true
+    currentArticle.value = { ...article }
+}
+
+const saveArticle = async () => {
+    try {
+        if (isEditingArticle.value) {
+            const { id, ...data } = currentArticle.value
+            await supabase.from('articles').update(data).eq('id', id)
+        } else {
+            await supabase.from('articles').insert({
+                ...currentArticle.value,
+                created_by: authStore.user.id
+            })
+        }
+        document.querySelector('#articleModal .btn-close').click()
+    } catch (err) {
+        alert('Error: ' + err.message)
+    }
+}
+
+const deleteArticle = async (id, title) => {
+    if (!confirm(`Delete "${title}"?`)) return
+    await supabase.from('articles').delete().eq('id', id)
+}
+
 const formatDateTime = (isoString) => {
     return new Date(isoString).toLocaleString('en-US', {
         month: 'short',

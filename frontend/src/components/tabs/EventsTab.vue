@@ -29,9 +29,10 @@
               {{ event.title }}
             </h5>
 
-            <p class="card-text text-muted flex-grow-1 mb-4">
+            <!-- <p class="card-text text-muted flex-grow-1 mb-4">
               {{ event.description || 'Join us for an exciting dance class!' }}
-            </p>
+            </p> -->
+            <div class="card-text text-muted flex-grow-1 mb-4" v-html="event.description"></div>
 
             <div class="d-flex align-items-center text-muted small mb-4">
               <i class="bi bi-geo-alt-fill me-2"></i>

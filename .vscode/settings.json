@@ -14,5 +14,7 @@
       ]
     }
   },
-  "npm.enableRunFromFolder": true
+  "npm.enableRunFromFolder": true,
+  "vue.format.template.enabled": true,
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
 }

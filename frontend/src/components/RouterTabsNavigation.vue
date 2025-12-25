@@ -57,6 +57,7 @@ const authStore = useAuthStore()
 const baseTabs = [
     { path: '/home', title: 'Home', icon: 'bi bi-house-door-fill' },
     { path: '/events', title: 'Events', icon: 'bi bi-calendar-event-fill' },
+    { path: '/news', title: 'News', icon: 'bi bi-newspaper' },
     { path: '/about', title: 'About', icon: 'bi bi-info-circle-fill' },
 ]
 

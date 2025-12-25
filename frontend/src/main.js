@@ -6,6 +6,7 @@ import router from './router';
 import { useAuthStore } from '@/stores/auth'
 import { useEventsStore } from '@/stores/events'
 import { useUsersStore } from '@/stores/users'
+import { useArticlesStore } from '@/stores/articles'
 
 // Bootstrap CSS & JS
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -31,6 +32,16 @@ eventsStore.enableRealtime()        // live updates forever
 const usersStore = useUsersStore()
 usersStore.fetchUsers()
 usersStore.enableRealtime()
+
+const articlesStore = useArticlesStore()
+// Public pages: only published
+if (!authStore.isAdmin) {
+  articlesStore.fetchPublishedArticles()
+} else {
+  // Admin: load all articles (including drafts)
+  articlesStore.fetchAllArticles()
+}
+articlesStore.enableRealtime()
 
 app.use(Toast, { position: 'top-right' })
 app.mount('#app');
