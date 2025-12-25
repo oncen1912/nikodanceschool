@@ -12,7 +12,7 @@ export const useArticlesStore = defineStore('articles', () => {
     loading.value = true
     const { data, error } = await supabase
       .from('articles')
-      .select('id, title, excerpt, image_url, published_at')
+      .select('id, title, excerpt, image_url, published_at, content')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
 
