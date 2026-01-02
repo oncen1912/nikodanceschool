@@ -1,17 +1,14 @@
 <template>
 
-
   <!-- Main content starts below navbar -->
-  <main class="pt-3"> <!-- pt-5 = padding-top for fixed navbar -->
-    <div class="container py-3">
-      <TabsNavigation />
-      <!-- Your existing tab content will appear here automatically -->
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </div>
+  <main class="container pt-2">
+    <TabsNavigation />
+    <!-- Your existing tab content will appear here automatically -->
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </main>
 </template>
 

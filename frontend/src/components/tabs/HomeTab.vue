@@ -1,6 +1,6 @@
 <!-- frontend/src/components/tabs/HomeTab.vue -->
 <template>
-  <div class="hero-section position-relative overflow-hidden">
+  <div class="hero-section position-relative overflow-hidden p-4">
     <!-- Video Background -->
     <video class="video-bg" autoplay muted loop playsinline poster="/images/niko.png">
       <source src="/videos/niko.mp4" type="video/mp4">
@@ -16,10 +16,13 @@
         <h1 class="display-3 fw-bold mb-4">
           Discover the Joy of Dance
         </h1>
-        <p class="lead mb-5 fs-3">
+        <p class="lead mb-3 fs-3">
           Join our vibrant community at Niko Dance School
         </p>
-        <router-link to="/events" class="btn btn-primary btn-lg px-5 py-3">
+        <p>
+          <img src="/images/logo-bouncewithme-white.png" alt="BounceWithMe" class="mb-4" style="height: 140px;">
+        </p>
+        <router-link to="/events" class="btn btn-outline-light btn-lg px-5 py-2">
           View Classes & Events
         </router-link>
       </div>

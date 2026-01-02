@@ -1,6 +1,6 @@
 <!-- frontend/src/components/tabs/NewsTab.vue -->
 <template>
-    <div>
+    <div class="container py-4">
         <h2 class="mb-5 text-center display-5 fw-bold">
             <i class="bi bi-newspaper text-primary me-3"></i>
             Latest News & Updates

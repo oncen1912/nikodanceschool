@@ -2,7 +2,7 @@
 <template>
     <div class="sticky-top bg-white shadow-sm">
         <!-- Bootstrap Tabs using router-link -->
-        <ul class="nav nav-tabs mb-4" id="routerTab" role="tablist">
+        <ul class="nav nav-tabs mb-0" id="routerTab" role="tablist">
             <li class="nav-item" role="presentation" v-for="tab in visibleTabs" :key="tab.path">
                 <router-link :to="tab.path" class="nav-link d-flex align-items-center" active-class="active"
                     exact-active-class="active" role="tab">

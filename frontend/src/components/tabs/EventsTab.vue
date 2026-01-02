@@ -1,6 +1,6 @@
 <!-- frontend/src/components/tabs/EventsTab.vue -->
 <template>
-  <div>
+  <div class="container py-4">
     <h2 class="mb-4">
       <i class="bi bi-calendar-event-fill text-primary me-2"></i>
       Upcoming Events & Classes
